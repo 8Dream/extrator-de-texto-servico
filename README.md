@@ -46,6 +46,32 @@ PC (Windows) ──Tailscale──> extrator-gateway :8110 (Caddy + Sablier, sem
 Modelos: `tiny`, `base`, `small`, `medium`, `large-v3`, `large-v3-turbo` (padrão). Formatos de entrada: tudo o que o
 ffmpeg decodifica (wav, mp3, m4a, mp4, ogg, opus, flac, webm…).
 
+## Desempenho medido (16/11/2026)
+
+Áudio de teste: diálogo sintético em pt-BR (duas vozes), 14,9 min; e o mesmo repetido 4 vezes (59,6 min).
+PC do Rafael: Intel i5-7200U (2 núcleos, 4 threads), 12 GB, sem GPU, motor atual do programa (faster-whisper, CPU, float32).
+
+| Motor | Modelo | 14,9 min de áudio | Velocidade |
+|---|---|---|---|
+| PC (programa) | small | cerca de 12,2 min (medido: 98,6 s para 2 min de áudio) | 1,2x o tempo real |
+| PC (programa) | large-v3 | cerca de 78 min (estimativa pela razão de parâmetros; **não medido**) | 0,2x |
+| Spark, serviço | large-v3-turbo | 25,9 s o job inteiro da primeira chamada (10 s só para carregar o modelo) | 35 a 60x |
+| Spark, serviço | large-v3 | 73 s | 12x |
+| Spark, serviço | large-v3, 59,6 min de áudio | 454 s (7,6 min) | 7,9x |
+
+- **Ponta a ponta** a partir do PC, com o turbo: 39 s (envio 9,6 s + processamento 25,9 s) contra mais de 12 min no PC com um modelo bem pior.
+- **Erro de palavras** no áudio sintético: small 10,5% (PC e Spark iguais, mesmo modelo), turbo 8,0%, large-v3 6,0%. Voz sintética é fácil;
+  áudio real de audiência, com ruído e sobreposição, só se mede com áudio real.
+- **Memória** (queda da memória disponível do host): turbo cerca de 5 GB; large-v3 com lote 4 cerca de 12 GB (com lote 8, 18 GB).
+- **vLLM em produção** (resposta mínima do modelo utilitário a cada 1 s): parado 91 a 120 ms; durante o turbo 127 ms (máx. 281);
+  durante o large-v3 de 1 h 187 ms (máx. 375). Sem falhas. Carga pesada no vLLM principal durante uma transcrição **não foi medida**.
+- **Rede PC para Spark** (Tailscale direto, IPv6): 24 Mbit/s em partes HTTP de 8 MB, 40 a 60 Mbit/s por SSH; 1 h de WAV (109 MB) leva ~1 min
+  para subir; comprimir antes (opus mono, ~1,5 MB por 8 min) reduz isso a segundos.
+- **Ligar a frio** pelo Sablier: 6,7 a 6,9 s. Desligamento por ociosidade comprovado (sessão de 1 min: contêiner parou em 60 s).
+  Job de 7,6 min completou com a sessão do Sablier em 1 min e o PC sem consultar: a renovação própria do serviço funciona.
+- **OCR** (PDF escaneado de 8 páginas, 200 dpi, Tesseract por): PC 6,6 s/página; Spark em ARM 1,0 s/página com 1 processo e 0,3 s/página com 8;
+  Docling da Spark 1,8 s/página (liga em 12 s) e devolve Markdown estruturado.
+
 ## Identificação de interlocutores
 
 Há um ponto de extensão (`app/diarizacao.py`): quando uma biblioteca for registrada, o job com
