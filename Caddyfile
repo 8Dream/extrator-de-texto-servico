@@ -1,0 +1,22 @@
+# Gateway do Extrator de Texto: liga o servico (Sablier) quando alguem chama e repassa o trafego.
+# Quem chama deve fazer GET /saude primeiro (espera ligar, ate 5 min) e so depois enviar o arquivo.
+{
+	order sablier before reverse_proxy
+	admin off
+	auto_https off
+}
+
+:8110 {
+	route {
+		sablier http://sablier:10000 {
+			names extrator-servico
+			session_duration 15m
+			blocking {
+				timeout 5m
+			}
+		}
+		reverse_proxy extrator-servico:8110 {
+			flush_interval -1
+		}
+	}
+}

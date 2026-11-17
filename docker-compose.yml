@@ -1,0 +1,53 @@
+# Extrator de Texto (servico) na Spark. Padrao dos demais servicos sob demanda (ver sablier/spark/LEIA-ME.md):
+# o trabalhador de GPU so existe quando alguem chama; o gateway (Caddy + Sablier) e leve e fica sempre no ar.
+#
+#   cd ~/EtherLake/extrator-servico
+#   docker compose -p extrator up -d --build --no-start extrator-servico   # cria parado
+#   docker compose -p extrator up -d gateway                               # gateway sempre ligado
+#
+# Quem chama: http://100.91.153.82:8110 (so na tailnet). Primeiro GET /saude (espera ligar), depois o resto.
+services:
+  extrator-servico:
+    build: .
+    image: extrator-servico:0.1.0
+    container_name: extrator-servico
+    platform: linux/arm64
+    restart: "no"                       # sob demanda: nao religa sozinho
+    labels:
+      sablier.enable: "true"
+      sablier.group: "extrator"
+    init: true
+    gpus: all
+    mem_limit: 14g                      # teto do contêiner; a memoria da Spark e unificada e apertada
+    cpus: 8
+    environment:
+      EXTRATOR_MODELO_PADRAO: "large-v3-turbo"
+      EXTRATOR_RETENCAO_HORAS: "24"
+      EXTRATOR_TAMANHO_MAX_GB: "4"
+    volumes:
+      - ./modelos:/modelos
+      - ./dados:/dados
+      - ${HOME}/.config/extrator-servico/tokens:/run/secrets/extrator_tokens:ro
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8110/saude', timeout=5)"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    networks: [sobdemanda]
+
+  gateway:
+    image: sob-demanda-caddy:sablier-1.0.2   # a mesma imagem do sob-demanda (Caddy + plugin do Sablier)
+    container_name: extrator-gateway
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - "100.91.153.82:8110:8110"       # so na interface da tailnet
+    networks: [sobdemanda]
+    mem_limit: 128m
+
+networks:
+  sobdemanda:
+    external: true
+    name: sob-demanda_sobdemanda

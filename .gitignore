@@ -1,0 +1,7 @@
+dados/
+modelos/
+teste/
+__pycache__/
+*.pyc
+tokens
+*.token
