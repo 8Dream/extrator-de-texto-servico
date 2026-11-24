@@ -121,3 +121,7 @@ python ferramentas/cliente_teste.py <url> audio.wav [modelo] [idioma]     # pont
 - Token por cliente, comparação em tempo constante; sem token = 401.
 - Limites: 4 GB por arquivo, 6 h de áudio, partes de até 64 MB; uploads parciais expiram em 6 h.
 - Mensagens de erro sem caminhos internos; logs sem conteúdo da fala.
+
+## Licença
+
+Copyright © 2026 Rafael Alves. O código está disponível sob a [GNU AGPL versão 3](LICENSE).
