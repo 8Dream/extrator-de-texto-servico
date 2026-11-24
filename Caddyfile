@@ -6,7 +6,9 @@
 }
 
 :8110 {
-	respond /favicon.ico 204
+	handle /favicon.ico {
+		respond 204
+	}
 
 	@web {
 		method GET HEAD

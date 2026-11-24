@@ -26,4 +26,7 @@ def executar():
 
 
 if __name__ == "__main__":
-    executar()
+    try:
+        executar()
+    finally:
+        motor.SESSION_LOG.unlink(missing_ok=True)

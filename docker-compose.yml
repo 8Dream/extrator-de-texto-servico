@@ -63,6 +63,7 @@ services:
     security_opt: [no-new-privileges:true]
     tmpfs:
       - /tmp:size=1g,mode=1777
+      - /opt/extrator/dados:size=64m,mode=0700,uid=${EXTRATOR_UID:-1000},gid=${EXTRATOR_GID:-1000}
     mem_limit: 3g
     cpus: 2
     volumes:
