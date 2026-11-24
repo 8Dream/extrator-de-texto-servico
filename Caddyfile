@@ -8,6 +8,37 @@
 
 :8110 {
 	route {
+		@inicio {
+			method GET HEAD
+			path /
+		}
+		header @inicio Content-Type "text/html; charset=utf-8"
+		respond @inicio <<HTML
+			<!doctype html>
+			<html lang="pt-BR">
+			<head>
+			  <meta charset="utf-8">
+			  <meta name="viewport" content="width=device-width, initial-scale=1">
+			  <title>Extrator de Texto</title>
+			  <style>
+			    :root { color-scheme: light dark; font: 1rem/1.6 system-ui, sans-serif; }
+			    body { margin: 0 auto; max-width: 38rem; padding: 12vh 1.5rem 2rem; }
+			    h1 { font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.1; }
+			    nav { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; }
+			  </style>
+			</head>
+			<body>
+			  <main>
+			    <h1>Extrator de Texto</h1>
+			    <p>API de transcrição de áudio e vídeo na Spark. As chamadas de transcrição exigem um token.</p>
+			    <nav aria-label="Links do serviço">
+			      <a href="/saude">Verificar API</a>
+			      <a href="https://github.com/8Dream/extrator-de-texto-servico#api-json-authorization-bearer-token">Documentação da API</a>
+			    </nav>
+			  </main>
+			</body>
+			</html>
+			HTML
 		sablier http://sablier:10000 {
 			names extrator-servico
 			session_duration 15m
