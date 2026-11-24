@@ -6,6 +6,8 @@
 }
 
 :8110 {
+	respond /favicon.ico 204
+
 	@web {
 		method GET HEAD
 		path / /web/estilo.css /web/extrator.js
