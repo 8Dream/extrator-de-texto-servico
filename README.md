@@ -5,8 +5,8 @@ Serviço self-hosted que transcreve áudio e vídeo na GPU da Spark (Whisper, mo
 Roda como os outros serviços sob demanda da Spark (Sablier): o contêiner de GPU só existe quando alguém chama
 e desliga sozinho depois de 15 min ocioso.
 
-- Projeto: `pessoal/extrator-de-texto-servico` (GitLab da Spark). Pasta na Spark: `~/EtherLake/extrator-servico`.
-- Endereço: `http://100.91.153.82:8110` (só na tailnet; autenticação por token em tudo, menos `/saude`).
+- Projeto: [8Dream/extrator-de-texto-servico](https://github.com/8Dream/extrator-de-texto-servico) (AGPL-3.0). Pasta na Spark: `~/EtherLake/extrator-servico`.
+- Endereço: `https://extrator.tail4beed6.ts.net` (só na tailnet; autenticação por token em tudo, menos `/saude`).
 - Áudio confidencial: nada sai da Spark. O áudio original é apagado assim que o job termina; resultados ficam
   24 h (ou até o cliente dar `DELETE`). Os logs não contêm o texto falado.
 
@@ -17,7 +17,7 @@ Este fork adapta o [Extrator de Texto](https://github.com/8Dream/extrator-de-tex
 ## Como funciona
 
 ```
-PC (Windows) ──Tailscale──> extrator-gateway :8110 (Caddy + Sablier, sempre ligado, 128 MB)
+Cliente ──HTTPS / Tailscale Serve──> extrator-gateway :8110 (Caddy + Sablier, sempre ligado, 128 MB)
                                └─ liga/espera ─> extrator-servico (FastAPI + PyTorch, GPU, sob demanda)
 ```
 
@@ -91,11 +91,15 @@ docker compose -p extrator build extrator-servico
 docker compose -p extrator up --no-start --force-recreate extrator-servico   # cria parado (o Sablier liga)
 docker compose -p extrator up -d gateway                                     # gateway sempre ligado
 
-curl http://100.91.153.82:8110/saude            # liga a frio (~7 s)
+sudo tailscale serve --service=svc:extrator --https=443 http://127.0.0.1:8110
+curl https://extrator.tail4beed6.ts.net/saude            # liga a frio (~7 s)
 docker logs -f extrator-servico                 # logs estruturados (uma linha JSON por evento)
 docker stop extrator-servico                    # desligar na mão (o Sablier religa no próximo pedido)
 docker compose -p extrator down                 # remove os dois contêineres (modelos e dados ficam em ./modelos e ./dados)
 ```
+
+O serviço Tailscale `svc:extrator` precisa existir na tailnet e a Spark precisa ser aprovada como
+host. O HTTPS termina no Tailscale Serve, que encaminha para o gateway no loopback.
 
 Tokens: `~/.config/extrator-servico/tokens` (uma linha `cliente:token`, mínimo 24 caracteres, modo 600; **fora do
 repositório**). O serviço **não sobe sem esse arquivo**. Para gerar: `echo "cliente:$(openssl rand -hex 24)" >> ...`.
@@ -104,7 +108,7 @@ Para revogar: apagar a linha e `docker restart extrator-servico`.
 ## Testes
 
 ```bash
-EXTRATOR_TOKEN=... EXTRATOR_TOKEN2=... python ferramentas/teste_servico.py http://100.91.153.82:8110 audio.wav basicos
+EXTRATOR_TOKEN=... EXTRATOR_TOKEN2=... python ferramentas/teste_servico.py https://extrator.tail4beed6.ts.net audio.wav basicos
 python ferramentas/teste_servico.py <url> audio.wav cancelamento
 python ferramentas/cliente_teste.py <url> audio.wav [modelo] [idioma]     # ponta a ponta, com tempos
 ```

@@ -7,7 +7,7 @@ Só desenho: nada disto foi implementado no programa. O modo local continua exis
 | Item | Decisão |
 |---|---|
 | Escolha do motor | Configurações da transcrição: **Motor: Este computador | Spark** (padrão: este computador). |
-| Endereço e token | URL `http://100.91.153.82:8110` (só tailnet). O token fica **criptografado no perfil do usuário do Windows** (DPAPI via `ctypes`, sem dependência nova), nunca em `dados\config.json`. |
+| Endereço e token | URL `https://extrator.tail4beed6.ts.net` (só tailnet). O token fica **criptografado no perfil do usuário do Windows** (DPAPI via `ctypes`, sem dependência nova), nunca em `dados\config.json`. |
 | Testar conexão | Botão na própria tela. Estados em texto: "Ligando a Spark…" (barra indeterminada, ~7 s a frio), "Conectado: GPU NVIDIA GB10, 6 modelos", "Spark fora do ar: a transcrição usará este computador". Sem pop-up. |
 | Fallback automático | `GET /saude` com limite de 8 s (a frio, até 40 s: o gateway liga o contêiner). Se falhar por rede, DNS ou 5xx **antes** de enviar o arquivo, a execução segue no motor local e a Central mostra o aviso "Spark indisponível, rodou neste computador". Se a Spark cair **durante** o job, o job fica "falhou" com o motivo e o botão **Repetir** (local ou Spark) aparece; não se repete sozinho, para não gastar horas em duplicidade. |
 | Envio | Em partes de 8 MB, retomável: após queda ou suspensão do PC, consulta `GET /v1/arquivos/{id}` e continua do `recebido`. Arquivos acima de 50 MB podem ser comprimidos antes (opus mono 16 kHz, ou FLAC sem perdas) com o ffmpeg que o programa já usa; o servidor aceita qualquer formato do ffmpeg. |

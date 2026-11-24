@@ -5,7 +5,7 @@
 #   docker compose -p extrator up -d --build --no-start extrator-servico   # cria parado
 #   docker compose -p extrator up -d gateway                               # gateway sempre ligado
 #
-# Quem chama: http://100.91.153.82:8110 (so na tailnet). Primeiro GET /saude (espera ligar), depois o resto.
+# Quem chama: https://extrator.tail4beed6.ts.net (so na tailnet). Primeiro GET /saude (espera ligar), depois o resto.
 services:
   extrator-servico:
     build: .
@@ -44,6 +44,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     ports:
       - "100.91.153.82:8110:8110"       # so na interface da tailnet
+      - "127.0.0.1:8110:8110"         # destino local do Tailscale Serve (svc:extrator)
     networks: [sobdemanda]
     mem_limit: 128m
 
