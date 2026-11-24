@@ -10,6 +10,19 @@ e desliga sozinho depois de 15 min ocioso.
 - Áudio confidencial: nada sai da Spark. O áudio original é apagado assim que o job termina; resultados ficam
   24 h (ou até o cliente dar `DELETE`). Os logs não contêm o texto falado.
 
+## Usar no navegador
+
+Abra [Extrator de Texto](https://extrator.tail4beed6.ts.net/) na tailnet e conecte com um token do serviço.
+O site mantém o token somente na memória da página e oferece duas filas:
+
+- **Transcrição**: seleção e arraste de áudios e vídeos, modelo e idioma, envio em partes, progresso,
+  cancelamento e download em TXT, Markdown, SRT e JSON.
+- **Documentos e OCR**: conversão direta em Markdown, OCR de PDF ou imagem em Markdown ou TXT, e PDF
+  pesquisável. As opções incluem intervalo de páginas em PDF. O limite é de 100 MiB por documento.
+
+O conversor usa o mesmo motor Python do aplicativo, em um contêiner separado com Tesseract. Os arquivos de
+trabalho do conversor ficam em armazenamento temporário e são descartados depois que o resultado é enviado.
+
 ## Origem do fork
 
 Este fork adapta o [Extrator de Texto](https://github.com/8Dream/extrator-de-texto) para operar como uma API na Spark. A branch `main` deste projeto conserva o Compose e a API na raiz para manter a mesma estrutura do ambiente em uso. O aplicativo para Windows continua no projeto original e seu histórico pode ser consultado pelo segundo pai do commit que uniu os dois projetos. A integração do aplicativo com a API está descrita em [Integração com o programa](docs/INTEGRACAO-PROGRAMA.md).
@@ -89,13 +102,14 @@ normalmente e avisa `diarizacao_indisponivel`**: nada é inventado.
 cd ~/EtherLake/extrator-servico
 docker compose -p extrator build extrator-servico
 docker compose -p extrator up --no-start --force-recreate extrator-servico   # cria parado (o Sablier liga)
+docker compose -p extrator up -d --build documentos                         # conversão e OCR do site
 docker compose -p extrator up -d gateway                                     # gateway sempre ligado
 
 sudo tailscale serve --service=svc:extrator --https=443 http://127.0.0.1:8110
 curl https://extrator.tail4beed6.ts.net/saude            # liga a frio (~7 s)
 docker logs -f extrator-servico                 # logs estruturados (uma linha JSON por evento)
 docker stop extrator-servico                    # desligar na mão (o Sablier religa no próximo pedido)
-docker compose -p extrator down                 # remove os dois contêineres (modelos e dados ficam em ./modelos e ./dados)
+docker compose -p extrator down                 # remove os contêineres (modelos e dados ficam em ./modelos e ./dados)
 ```
 
 O serviço Tailscale `svc:extrator` precisa existir na tailnet e a Spark precisa ser aprovada como

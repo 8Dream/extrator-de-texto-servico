@@ -1,0 +1,17 @@
+FROM python:3.12-slim-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends git ghostscript tesseract-ocr-por tesseract-ocr-eng tesseract-ocr-osd \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git init /opt/extrator && git -C /opt/extrator fetch --depth=1 https://github.com/8Dream/extrator-de-texto.git 4e6609671be46bba64f9459ff0099a7f591de4fe \
+    && git -C /opt/extrator checkout --detach FETCH_HEAD \
+    && python -m pip install --no-cache-dir "fastapi>=0.115,<1" "uvicorn>=0.34,<1" \
+       "markitdown[pdf,docx,xlsx,pptx]==0.1.6" "rich>=13.9,<15" "PyMuPDF>=1.26,<2" \
+       "pytesseract>=0.3.13,<1" "Pillow>=11,<13" "ocrmypdf>=17.8,<18" "pypdfium2>=5.9" \
+    && mkdir -p /opt/extrator/dados/logs /opt/extrator/dados/work /opt/extrator/dados/tessdata
+
+WORKDIR /srv
+COPY app/auth.py app/config.py app/documentos.py app/motor_documentos.py /srv/app/
+ENV PYTHONPATH=/opt/extrator/src PYTHONUNBUFFERED=1
+USER 1000:1000
+CMD ["python", "-m", "uvicorn", "app.documentos:api", "--host", "0.0.0.0", "--port", "8111", "--no-access-log"]

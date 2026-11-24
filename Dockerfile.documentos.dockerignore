@@ -1,0 +1,6 @@
+**
+!app/
+!app/auth.py
+!app/config.py
+!app/documentos.py
+!app/motor_documentos.py

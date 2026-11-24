@@ -42,11 +42,32 @@ services:
     restart: unless-stopped
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./web:/srv/web:ro
     ports:
       - "100.91.153.82:8110:8110"       # so na interface da tailnet
       - "127.0.0.1:8110:8110"         # destino local do Tailscale Serve (svc:extrator)
     networks: [sobdemanda]
     mem_limit: 128m
+
+  documentos:
+    build:
+      context: .
+      dockerfile: Dockerfile.documentos
+    image: extrator-documentos:local
+    container_name: extrator-documentos
+    restart: unless-stopped
+    init: true
+    user: "${EXTRATOR_UID:-1000}:${EXTRATOR_GID:-1000}"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:size=1g,mode=1777
+    mem_limit: 3g
+    cpus: 2
+    volumes:
+      - ${HOME}/.config/extrator-servico/tokens:/run/secrets/extrator_tokens:ro
+    networks: [sobdemanda]
 
 networks:
   sobdemanda:

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Extrator de Texto</title>
+  <link rel="stylesheet" href="/web/estilo.css">
+  <script type="module" src="/web/extrator.js"></script>
+</head>
+<body>
+  <main>
+    <header class="cabecalho">
+      <h1>Extrator de Texto</h1>
+      <a href="https://github.com/8Dream/extrator-de-texto-servico">Código-fonte</a>
+    </header>
+
+    <form id="conexao" class="conexao">
+      <label for="token">Token de acesso</label>
+      <div class="linha">
+        <input id="token" type="password" required autocomplete="off" spellcheck="false">
+        <button id="conectar">Conectar</button>
+      </div>
+      <p id="estado-conexao" role="status">Use o token do serviço para processar arquivos.</p>
+    </form>
+
+    <nav class="abas" aria-label="Ferramentas">
+      <button id="aba-transcricao" type="button" aria-pressed="true">Transcrição</button>
+      <button id="aba-documentos" type="button" aria-pressed="false">Documentos e OCR</button>
+    </nav>
+
+    <form id="processamento" class="painel">
+      <label id="seletor" class="seletor" for="arquivos">
+        <strong id="tipo-arquivo">Selecione ou arraste áudios e vídeos</strong>
+        <span id="formatos-arquivo">MP3, WAV, M4A, MP4, entre outros</span>
+      </label>
+      <input id="arquivos" class="visualmente-oculto" type="file" multiple
+        accept="audio/*,video/*,.opus,.ogg,.mkv,.m4a,.wma,.aac,.flac,.avi,.wmv,.m4v">
+      <div id="ajustes-transcricao" class="ajustes">
+        <label>Modelo <select id="modelo" required><option value="">Conecte ao serviço</option></select></label>
+        <label>Idioma <select id="idioma" required><option value="">Conecte ao serviço</option></select></label>
+      </div>
+      <div id="ajustes-documentos" class="ajustes" hidden>
+        <label>Modo
+          <select id="modo">
+            <option value="direct">Conversão direta</option>
+            <option value="auto-ocr">OCR automático de PDF</option>
+            <option value="force-ocr">OCR forçado de PDF</option>
+            <option value="searchable">PDF pesquisável</option>
+            <option value="force-pdf">PDF pesquisável com OCR forçado</option>
+            <option value="redo-pdf">Refazer OCR de PDF</option>
+            <option value="imagem">OCR de imagem</option>
+          </select>
+        </label>
+        <label>Saída <select id="formato"></select></label>
+        <label id="campo-paginas" hidden>Páginas
+          <input id="paginas" maxlength="150" placeholder="Todas (ou 1-3, 5)" pattern="[0-9,\s\-]*">
+        </label>
+      </div>
+      <div class="linha acoes">
+        <button id="iniciar" class="primario" disabled>Transcrever fila</button>
+        <button id="cancelar" type="button" hidden>Cancelar execução</button>
+      </div>
+      <p id="estado-fila" role="status"></p>
+    </form>
+
+    <section class="fila" aria-labelledby="titulo-fila">
+      <div class="linha cabecalho-fila">
+        <h2 id="titulo-fila">Fila de arquivos</h2>
+        <button id="limpar" type="button" disabled>Limpar fila</button>
+      </div>
+      <p id="fila-vazia">Os arquivos selecionados aparecem aqui.</p>
+      <ul id="itens-fila"></ul>
+    </section>
+  </main>
+</body>
+</html>
