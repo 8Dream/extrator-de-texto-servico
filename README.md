@@ -10,6 +10,10 @@ e desliga sozinho depois de 15 min ocioso.
 - Áudio confidencial: nada sai da Spark. O áudio original é apagado assim que o job termina; resultados ficam
   24 h (ou até o cliente dar `DELETE`). Os logs não contêm o texto falado.
 
+## Origem do fork
+
+Este fork adapta o [Extrator de Texto](https://github.com/8Dream/extrator-de-texto) para operar como uma API na Spark. A branch `main` deste projeto conserva o Compose e a API na raiz para manter a mesma estrutura do ambiente em uso. O aplicativo para Windows continua no projeto original e seu histórico pode ser consultado pelo segundo pai do commit que uniu os dois projetos. A integração do aplicativo com a API está descrita em [Integração com o programa](docs/INTEGRACAO-PROGRAMA.md).
+
 ## Como funciona
 
 ```
